@@ -1,0 +1,18 @@
+go-restapi/
+├── cmd/api/main.go              ← Entry point + DI wiring + graceful shutdown
+├── internal/
+│   ├── config/config.go         ← Load semua env vars, panic jika wajib tidak ada
+│   ├── database/postgres.go     ← Koneksi pool ke PostgreSQL VM
+│   ├── domain/user.go           ← Entity, DTO, sentinel errors, response wrapper
+│   ├── handler/user_handler.go  ← HTTP handler + bind/validate + error mapping
+│   ├── middleware/
+│   │   ├── auth.go              ← JWT + API Key + RequireRole middleware
+│   │   └── logger.go            ← Zerolog request logger + panic recovery
+│   ├── repository/user_repo.go  ← HANYA prepared statements ($1,$2...)
+│   └── service/user_service.go  ← bcrypt, JWT generate, business logic
+├── migrations/                  ← SQL up/down
+├── scripts/migrate.sh
+├── Dockerfile                   ← Multi-stage, ~20MB final image
+├── docker-compose.yml
+├── .env / .env.example
+└── Makefile

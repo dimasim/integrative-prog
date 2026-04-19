@@ -1,0 +1,17 @@
+# 1. Sesuaikan .env (DB_HOST sudah diset ke host.docker.internal)
+nano .env
+
+# 2. Buat database di PostgreSQL VM
+psql -h <IP_VM> -U admin -c "CREATE DATABASE restapi_db;"
+
+# 3. Install migrate CLI (sekali saja)
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+# 4. Jalankan migrasi
+make migrate-up
+
+# 5. Build & run Docker
+make compose-up
+
+# 6. Test
+curl http://localhost:8080/health
