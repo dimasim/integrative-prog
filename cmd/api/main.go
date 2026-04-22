@@ -45,6 +45,20 @@ func main() {
 	userSvc  := service.NewUserService(userRepo, cfg.JWT)
 	userHdlr := handler.NewUserHandler(userSvc)
 
+	postRepo, err := repository.NewPostRepository(db)
+    if err != nil {
+        log.Fatal().Err(err).Msg("failed to initialize post repository")
+    }
+    
+    commentRepo, err := repository.NewCommentRepository(db)
+    if err != nil {
+        log.Fatal().Err(err).Msg("failed to prepare comment statements")
+    }
+
+	postSvc := service.NewPostService(postRepo)
+	commentSvc := service.NewCommentService(commentRepo, postRepo)
+	postHandler := handler.NewPostHandler(postSvc, commentSvc)
+
 	// ── 5. Setup Gin Router ────────────────────────────────────────────────
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -79,6 +93,7 @@ func main() {
 	// /api/v1 → JWT-protected public API
 	v1 := router.Group("/api/v1")
 	userHdlr.RegisterRoutes(v1, jwtMW, adminMW)
+	postHandler.RegisterRoutes(v1, jwtMW) // Tambahan rute untuk Post
 
 	// /api/internal → API Key-protected (untuk service-to-service)
 	internalGroup := router.Group("/api/internal", apiKeyMW)

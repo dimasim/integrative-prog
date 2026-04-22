@@ -1,0 +1,58 @@
+# ============================================================
+# Go / Golang
+# ============================================================
+# Binari hasil build
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+build/
+tmp/
+main
+
+# File hasil testing & coverage
+*.test
+*.out
+
+# Folder vendor (jika menggunakan go mod vendor)
+# vendor/
+
+# ============================================================
+# Keamanan & Environment Variables (SANGAT PENTING)
+# ============================================================
+# Jangan pernah commit file .env asli ke Git!
+.env
+.env.*
+*.env
+
+# Pengecualian: Bolehkan file contoh/template agar tim tahu formatnya
+!.env.example
+
+# ============================================================
+# Docker & Database
+# ============================================================
+# Abaikan folder lokal jika sewaktu-waktu volume di-bind ke lokal
+pgdata/
+data/
+db-data/
+
+# ============================================================
+# Editor & IDE (VS Code, Goland, vim)
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ============================================================
+# OS Specific (Mac / Windows)
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

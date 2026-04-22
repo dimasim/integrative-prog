@@ -58,6 +58,15 @@ cp .env.example .env
 
 ### 2. Jalankan Migrasi Database
 ```bash
+wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
+
+sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
+
+nano ~/.bashrc
+
+# tambah export PATH=$PATH:/usr/local/go/bin
+# install make saya lupa caranya
+
 # Install golang-migrate CLI (sekali saja)
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
@@ -65,7 +74,7 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 psql -h <VM_IP> -U admin -c "CREATE DATABASE restapi_db;"
 
 # Jalankan migrasi
-make migrate-up
+migrate -path ./migrations -database "postgres://admin:admin123@127.0.0.1:5432/restapi_db?sslmode=disable" up
 ```
 
 ### 3. Development Lokal
@@ -81,6 +90,8 @@ make docker-build
 
 # Jalankan via Docker Compose
 make compose-up
+docker network connect integrative-prog_default @containerpostgres
+
 ```
 
 ---
