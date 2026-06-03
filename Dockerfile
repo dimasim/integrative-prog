@@ -2,7 +2,7 @@
 # Stage 1 — Builder
 # Menggunakan golang:alpine untuk compile. Hasilnya HANYA binary.
 # ════════════════════════════════════════════════════════════════
-FROM golang:1.22-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Install dependencies build (git untuk go modules via VCS)
 RUN apk add --no-cache git ca-certificates tzdata

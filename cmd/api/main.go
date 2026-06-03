@@ -90,8 +90,9 @@ func main() {
 	apiKeyMW := middleware.APIKeyAuth(cfg.APIKey)
 	adminMW  := middleware.RequireRole("admin")
 
+	rateLimitMW := middleware.RateLimit()
 	// /api/v1 → JWT-protected public API
-	v1 := router.Group("/api/v1")
+	v1 := router.Group("/api/v1", rateLimitMW) 
 	userHdlr.RegisterRoutes(v1, jwtMW, adminMW)
 	postHandler.RegisterRoutes(v1, jwtMW) // Tambahan rute untuk Post
 

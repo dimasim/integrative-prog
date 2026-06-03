@@ -13,7 +13,10 @@ import (
 	"github.com/dimasim/integrative-prog/internal/service"
 )
 
+// validate adalah singleton instance — di-share oleh semua handler dalam package ini.
 var validate = validator.New()
+
+// ─── UserHandler ──────────────────────────────────────────────────────────────
 
 type UserHandler struct {
 	svc service.UserService
@@ -32,10 +35,10 @@ func (h *UserHandler) RegisterRoutes(rg *gin.RouterGroup, authMW, adminMW gin.Ha
 	// Protected — butuh JWT
 	users := rg.Group("/users", authMW)
 	{
-		users.GET("", adminMW, h.GetAll)      // hanya admin
-		users.GET("/:id", h.GetByID)          // semua authenticated user
-		users.PATCH("/:id", adminMW, h.Update) // hanya admin
-		users.DELETE("/:id", adminMW, h.Delete) // hanya admin
+		users.GET("", adminMW, h.GetAll)         // hanya admin
+		users.GET("/:id", h.GetByID)             // semua authenticated user
+		users.PATCH("/:id", adminMW, h.Update)   // hanya admin
+		users.DELETE("/:id", adminMW, h.Delete)  // hanya admin
 	}
 }
 
@@ -117,7 +120,8 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 }
 
 func (h *UserHandler) GetByID(c *gin.Context) {
-	id, err := parseID(c)
+	// parseID dengan param name "id" — signature baru yang kompatibel
+	id, err := parseID(c, "id")
 	if err != nil {
 		return
 	}
@@ -136,7 +140,7 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 }
 
 func (h *UserHandler) Update(c *gin.Context) {
-	id, err := parseID(c)
+	id, err := parseID(c, "id")
 	if err != nil {
 		return
 	}
@@ -160,7 +164,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 }
 
 func (h *UserHandler) Delete(c *gin.Context) {
-	id, err := parseID(c)
+	id, err := parseID(c, "id")
 	if err != nil {
 		return
 	}
@@ -176,10 +180,10 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	})
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Package-level helpers (dipakai oleh semua handler dalam package ini) ─────
 
 // bindAndValidate bind JSON body dan validasi menggunakan struct tags.
-// Mengembalikan false jika ada error dan sudah menulis response.
+// Mengembalikan false jika ada error — response sudah ditulis, caller cukup return.
 func bindAndValidate(c *gin.Context, req interface{}) bool {
 	if err := c.ShouldBindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, domain.APIError{
@@ -201,13 +205,16 @@ func bindAndValidate(c *gin.Context, req interface{}) bool {
 	return true
 }
 
-// handleServiceError — peta sentinel errors ke HTTP status codes.
-// Tidak pernah bocorkan detail DB atau stack trace ke client.
+// handleServiceError memetakan sentinel error domain ke HTTP status code.
+// Mencatat error ke zerolog sebelum respond — tidak pernah bocorkan detail
+// internal (DB error, stack trace) ke client.
 func handleServiceError(c *gin.Context, err error) {
 	log.Err(err).Str("path", c.Request.URL.Path).Msg("service error")
 
 	switch {
-	case errors.Is(err, domain.ErrNotFound):
+	case errors.Is(err, domain.ErrNotFound),
+		errors.Is(err, domain.ErrPostNotFound),
+		errors.Is(err, domain.ErrCommentNotFound):
 		c.JSON(http.StatusNotFound, domain.APIError{Code: 404, Message: "Resource not found"})
 	case errors.Is(err, domain.ErrConflict):
 		c.JSON(http.StatusConflict, domain.APIError{Code: 409, Message: "Resource already exists"})
@@ -220,13 +227,17 @@ func handleServiceError(c *gin.Context, err error) {
 	}
 }
 
-func parseID(c *gin.Context) (int64, error) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+// parseID mengekstrak URL param sebagai int64 dan menulis response 400 jika gagal.
+// param adalah nama param di route, misalnya "id", "post_id".
+// Signature ini menggantikan parseID lama yang hanya bisa handle param "id".
+func parseID(c *gin.Context, param string) (int64, error) {
+	id, err := strconv.ParseInt(c.Param(param), 10, 64)
 	if err != nil || id <= 0 {
 		c.JSON(http.StatusBadRequest, domain.APIError{
 			Code:    http.StatusBadRequest,
 			Message: "Invalid ID parameter",
 		})
+		c.Abort()
 		return 0, err
 	}
 	return id, nil
