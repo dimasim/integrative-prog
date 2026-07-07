@@ -115,27 +115,27 @@ docker network connect integrative-prog_default @containerpostgres
 
 ### Register
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
+curl -X POST http://localhost:8099/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"John Doe","email":"john@example.com","password":"secret123","role":"user"}'
 ```
 
 ### Login
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
+curl -X POST http://localhost:8099/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"john@example.com","password":"secret123"}'
 ```
 
 ### Get User (dengan JWT)
 ```bash
-curl http://localhost:8080/api/v1/users/1 \
+curl http://localhost:8099/api/v1/users/1 \
   -H "Authorization: Bearer <token_dari_login>"
 ```
 
 ### API Key (service-to-service)
 ```bash
-curl http://localhost:8080/api/internal/users \
+curl http://localhost:8099/api/internal/users \
   -H "X-API-Key: your-static-api-key"
 ```
 

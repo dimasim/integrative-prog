@@ -14,4 +14,4 @@ make migrate-up
 make compose-up
 
 # 6. Test
-curl http://localhost:8080/health
+curl http://localhost:8099/health

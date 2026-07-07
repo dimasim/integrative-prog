@@ -12,9 +12,9 @@ services:
     container_name: go-restapi
     restart: unless-stopped
     ports:
-      - "8088:8088"
+      - "8099:8099"
     env_file:
-      - .env.docker
+      - .env
     environment:
       - DB_HOST=db
     networks:
@@ -25,7 +25,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8088/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8099/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -36,9 +36,9 @@ services:
     container_name: postgres-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: restapi_db # Ubah sesuai kebutuhan aplikasi
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       # Best Practice Keamanan: Hanya diekspos ke localhost mesin host (VPS/Lokal)
       # Mencegah akses publik langsung ke port 5432 dari luar
@@ -50,7 +50,7 @@ services:
       - app-network
     # Best Practice: Healthcheck bawaan Postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d nama_database_kamu"]
+      test: ["CMD-SHELL", "pg_isready -U $${DB_USER} -d $${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5

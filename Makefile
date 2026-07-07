@@ -26,7 +26,7 @@ docker-build:
 
 ## docker-run: jalankan container dengan .env file
 docker-run:
-	docker run --rm -p 8088:8088 \
+	docker run --rm -p 8099:8099 \
 		--env-file .env \
 		--add-host host.docker.internal:host-gateway \
 		--name $(APP_NAME) \
