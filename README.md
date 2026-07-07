@@ -58,24 +58,16 @@ cp .env.example .env
 
 ### 2. Jalankan Migrasi Database
 ```bash
-wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
-
-sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
-
-nano ~/.bashrc
-
-# tambah export PATH=$PATH:/usr/local/go/bin
-# install make saya lupa caranya
-
-# Install golang-migrate CLI (sekali saja)
+# Install golang-migrate CLI (jika dijalankan secara lokal di luar Docker)
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
-# Buat database dulu di PostgreSQL VM
-psql -h <VM_IP> -U admin -c "CREATE DATABASE restapi_db;"
-
-# Jalankan migrasi
-migrate -path ./migrations -database "postgres://admin:admin123@127.0.0.1:5432/restapi_db?sslmode=disable" up
+# Jalankan migrasi menggunakan skrip pembantu (otomatis membaca kredensial dari .env)
+chmod +x ./scripts/migrate.sh
+./scripts/migrate.sh up
 ```
+
+> **Catatan Seeding**: Proyek ini tidak menyertakan seed data database bawaan. Inisialisasi data (misalnya mendaftarkan akun administrator pertama) bisa langsung dilakukan melalui pemanggilan API endpoint register (lihat contoh di bagian bawah).
+
 
 ### 3. Development Lokal
 ```bash
