@@ -4,7 +4,7 @@
 ## Tech Stack
 - **Runtime**: Go 1.22
 - **Framework**: Gin
-- **Database**: PostgreSQL (eksternal di VirtualBox VM)
+- **Database**: PostgreSQL (Docker / Eksternal VM)
 - **Auth**: JWT Bearer Token + Static API Key
 - **Infra**: Docker Multi-stage Build (Alpine)
 
@@ -37,7 +37,7 @@ go-restapi/
 │   └── 000001_create_users_table.down.sql
 ├── scripts/
 │   └── migrate.sh               ← Helper script untuk golang-migrate CLI
-├── .env                         ← Kredensial (JANGAN di-commit!)
+├── .env                         ← Kredensial (Aman & di-ignore dari Git)
 ├── .env.example                 ← Template .env yang aman di-commit
 ├── .gitignore
 ├── docker-compose.yml
@@ -53,7 +53,7 @@ go-restapi/
 ### 1. Setup Environment
 ```bash
 cp .env.example .env
-# Edit .env sesuaikan DB_HOST, DB_USER, DB_PASSWORD, JWT_SECRET, API_KEY
+# Edit .env sesuaikan DB_HOST, DB_USER, DB_PASSWORD, JWT_SECRET, API_KEY. Port default diset ke 8099.
 ```
 
 ### 2. Jalankan Migrasi Database
@@ -80,19 +80,17 @@ migrate -path ./migrations -database "postgres://admin:admin123@127.0.0.1:5432/r
 ### 3. Development Lokal
 ```bash
 go mod tidy
-make run
+go run ./cmd/api/...
 ```
 
 ### 4. Docker (Produksi)
 ```bash
 # Build image (multi-stage, hasilnya ~20MB)
-make docker-build
+docker build -t go-restapi:latest .
 
-# Jalankan via Docker Compose
-make compose-up
-docker network connect integrative-prog_default @containerpostgres
-
-```
+# Jalankan via Docker Compose (Menjalankan aplikasi & database PostgreSQL secara dinamis dari .env)
+docker compose up -d
+````
 
 ---
 
