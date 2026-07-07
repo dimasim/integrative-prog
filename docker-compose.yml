@@ -1,7 +1,6 @@
 # ============================================================
 # Docker Compose — Go App & PostgreSQL
 # ============================================================
-version: "3.9"
 
 services:
   app:
@@ -12,7 +11,7 @@ services:
     container_name: go-restapi
     restart: unless-stopped
     ports:
-      - "8099:8099"
+      - "${APP_PORT}:${APP_PORT}"
     env_file:
       - .env
     environment:
@@ -25,7 +24,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8099/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:${APP_PORT}/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -42,7 +41,7 @@ services:
     ports:
       # Best Practice Keamanan: Hanya diekspos ke localhost mesin host (VPS/Lokal)
       # Mencegah akses publik langsung ke port 5432 dari luar
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${DB_PORT}:5432"
     volumes:
       # Best Practice Maintainability: Gunakan named volume agar data persisten
       - pgdata:/var/lib/postgresql/data
